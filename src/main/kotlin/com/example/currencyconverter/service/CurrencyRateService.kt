@@ -9,6 +9,9 @@ import reactor.core.publisher.Mono
 
 @Service
 class CurrencyRateService(private val webClient: WebClient) {
+    companion object {
+        private val exchangeRateResponseType = object : ParameterizedTypeReference<ExchangeRateResponse>() {}
+    }
 
     fun getExchangeRate(baseCurrency: String): Mono<ExchangeRateResponse> {
         //GET https://open.er-api.com/v6/latest/USD
@@ -23,6 +26,6 @@ class CurrencyRateService(private val webClient: WebClient) {
         return webClient.get()
             .uri(uri)
             .retrieve()
-            .bodyToMono(object : ParameterizedTypeReference<ExchangeRateResponse>() {})
+            .bodyToMono(exchangeRateResponseType)
     }
 }
