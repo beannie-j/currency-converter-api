@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach
 
 import org.junit.jupiter.api.Assertions.*
 
-internal class CurrencyRateControllerTest {
+internal class ExchangeRateControllerTest {
 
     @BeforeEach
     fun setUp() {

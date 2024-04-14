@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
 
 @RestController
-class CurrencyRateController(private val currencyRateService: CurrencyRateService) {
+class ExchangeRateController(private val currencyRateService: CurrencyRateService) {
 
     @GetMapping("/exchange-rate")
     fun getExchangeRate(
