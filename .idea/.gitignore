@@ -1,0 +1,38 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+
+# Gradle files
+.gradle/
+build/
+
+# IntelliJ IDEA files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse files
+.classpath
+.project
+.settings/
+
+# Compiled bytecode
+*.class
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+
+# IDE-specific directories
+.vscode/
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Dependency directories
+build/
+out/
