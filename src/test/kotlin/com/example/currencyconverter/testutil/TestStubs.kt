@@ -1,9 +1,12 @@
 package com.example.currencyconverter.testutil
 
 import com.example.currencyconverter.api.ExchangeRateDetailsResponse
+import com.example.currencyconverter.api.ExchangeRateResponse
 
 object TestStubs {
     const val testBaseUrl: String = "https://test.example.com"
+    const val usdCurrency = "USD"
+    const val unknownCurrency = "UNKNOWN"
 
     val exchangeRateDetailsResponse = ExchangeRateDetailsResponse(
         result = "success",
@@ -22,4 +25,6 @@ object TestStubs {
             "JPY" to 109.656
         )
     )
+
+    val exchangeRateResponse = ExchangeRateResponse(exchangeRateDetailsResponse)
 }

@@ -2,6 +2,8 @@ package com.example.currencyconverter.service
 
 import com.example.currencyconverter.api.ExchangeRateResponse
 import com.example.currencyconverter.testutil.TestStubs
+import com.example.currencyconverter.testutil.TestStubs.unknownCurrency
+import com.example.currencyconverter.testutil.TestStubs.usdCurrency
 import com.example.currencyconverter.testutil.TestUtil.readFileFromResources
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -51,21 +53,20 @@ class CurrencyRateServiceTest {
             )
         )
 
-        val exchangeRate = currencyRateService.getExchangeRate("USD")
+        val exchangeRate = currencyRateService.getExchangeRate(usdCurrency)
 
         StepVerifier.create(exchangeRate)
             .expectNext(ExchangeRateResponse(TestStubs.exchangeRateDetailsResponse))
             .verifyComplete()
 
         verify(exchangeFunction).exchange(argThat { request: ClientRequest ->
-            Equals(request.url().toString()).matches("https://open.er-api.com/v6/latest/USD")
+            Equals(request.url().toString()).matches("https://open.er-api.com/v6/latest/$usdCurrency")
             Equals(request.method()).matches(HttpMethod.GET)
         })
     }
 
     @Test
     fun `should throw CurrencyRateNotFoundException when currency is not found`() {
-        val unknownCurrency = "UNKNOWN"
         val notFoundResponse = ClientResponse.create(HttpStatus.NOT_FOUND).build()
 
         `when`(exchangeFunction.exchange(any())).thenReturn(Mono.just(notFoundResponse))
@@ -88,7 +89,7 @@ class CurrencyRateServiceTest {
 
         `when`(exchangeFunction.exchange(any())).thenReturn(Mono.just(failedResponse))
 
-        val exchangeRate = currencyRateService.getExchangeRate("USD")
+        val exchangeRate = currencyRateService.getExchangeRate(usdCurrency)
 
         StepVerifier.create(exchangeRate)
             .expectNext(
@@ -101,7 +102,7 @@ class CurrencyRateServiceTest {
             .verifyComplete()
 
         verify(exchangeFunction).exchange(argThat { request: ClientRequest ->
-            Equals(request.url().toString()).matches("https://open.er-api.com/v6/latest/USD")
+            Equals(request.url().toString()).matches("https://open.er-api.com/v6/latest/$usdCurrency")
             Equals(request.method()).matches(HttpMethod.GET)
         })
     }
