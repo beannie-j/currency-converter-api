@@ -5,7 +5,6 @@ import com.example.currencyconverter.api.ExchangeRateResponse
 import com.example.currencyconverter.exception.CurrencyConverterException
 import com.example.currencyconverter.exception.CurrencyRateException
 import com.example.currencyconverter.exception.CurrencyRateNotFoundException
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
@@ -14,13 +13,8 @@ import reactor.core.publisher.Mono
 
 @Service
 class CurrencyRateService(private val webClient: WebClient) {
-    companion object {
-        private val exchangeRateDetailsResponseType =
-            object : ParameterizedTypeReference<ExchangeRateDetailsResponse>() {}
-    }
 
     fun getExchangeRate(baseCurrency: String): Mono<ExchangeRateResponse> {
-        //GET https://open.er-api.com/v6/latest/USD
 
         val uri = UriComponentsBuilder.newInstance()
             .scheme("https")
@@ -39,7 +33,7 @@ class CurrencyRateService(private val webClient: WebClient) {
                 }
                 Mono.error<CurrencyConverterException>(CurrencyRateException("Failed to fetch currency rates"))
             })
-            .bodyToMono(exchangeRateDetailsResponseType)
+            .bodyToMono(ExchangeRateDetailsResponse::class.java)
             .map { ExchangeRateResponse(it) }
             .onErrorResume { it: Throwable -> Mono.just(ExchangeRateResponse(it)) }
     }
