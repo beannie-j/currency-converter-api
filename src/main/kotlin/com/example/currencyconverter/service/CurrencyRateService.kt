@@ -10,13 +10,14 @@ import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Mono
+import java.net.URI
 
 @Service
 class CurrencyRateService(private val webClient: WebClient) {
 
     fun getExchangeRate(baseCurrency: String): Mono<ExchangeRateResponse> {
 
-        val uri = UriComponentsBuilder.newInstance()
+        val uri: URI = UriComponentsBuilder.newInstance()
             .scheme("https")
             .host("open.er-api.com")
             .path("/v6/latest/$baseCurrency")

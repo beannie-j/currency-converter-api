@@ -1,0 +1,17 @@
+{
+  "result": "success",
+  "provider": "ExchangeRatesAPI",
+  "documentation": "https://www.exchangeratesapi.io/documentation/",
+  "terms_of_use": "https://www.exchangeratesapi.io/terms/",
+  "time_last_update_unix": 1617954645,
+  "time_last_update_utc": "2021-04-09 17:10:45",
+  "time_next_update_unix": 1617958245,
+  "time_next_update_utc": "2021-04-09 18:10:45",
+  "time_eol_unix": 1617961845,
+  "base_code": "USD",
+  "rates": {
+    "EUR": 0.842593,
+    "GBP": 0.72478,
+    "JPY": 109.656
+  }
+}
