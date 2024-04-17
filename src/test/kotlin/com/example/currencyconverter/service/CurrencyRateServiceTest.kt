@@ -5,7 +5,12 @@ import com.example.currencyconverter.testutil.TestStubs
 import com.example.currencyconverter.testutil.TestUtil.readFileFromResources
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.*
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.argThat
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
+import org.mockito.internal.matchers.Equals
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -16,7 +21,7 @@ import org.springframework.web.reactive.function.client.ExchangeFunction
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
-import java.net.URI
+
 
 class CurrencyRateServiceTest {
     private lateinit var webClient: WebClient
@@ -53,28 +58,27 @@ class CurrencyRateServiceTest {
             .verifyComplete()
 
         verify(exchangeFunction).exchange(argThat { request: ClientRequest ->
-            request.url() == URI.create("https://open.er-api.com/v6/latest/USD")
-                    && request.method() == HttpMethod.GET
+            Equals(request.url().toString()).matches("https://open.er-api.com/v6/latest/USD")
+            Equals(request.method()).matches(HttpMethod.GET)
         })
     }
 
     @Test
     fun `should throw CurrencyRateNotFoundException when currency is not found`() {
+        val unknownCurrency = "UNKNOWN"
         val notFoundResponse = ClientResponse.create(HttpStatus.NOT_FOUND).build()
 
         `when`(exchangeFunction.exchange(any())).thenReturn(Mono.just(notFoundResponse))
 
-        val exchangeRate = currencyRateService.getExchangeRate("UNKNOWN")
+        val exchangeRate = currencyRateService.getExchangeRate(unknownCurrency)
 
         StepVerifier.create(exchangeRate)
             .expectNext(ExchangeRateResponse(success = false, rates = emptyMap(), errorMessage = "Currency not found"))
             .verifyComplete()
 
         verify(exchangeFunction).exchange(argThat { request: ClientRequest ->
-            println(request.url())
-            println(request.method())
-            request.url() == URI.create("https://open.er-api.com/v6/latest/UNKNOWN")
-                    && request.method() == HttpMethod.GET
+            Equals(request.url().toString()).matches("https://open.er-api.com/v6/latest/$unknownCurrency")
+            Equals(request.method()).matches(HttpMethod.GET)
         })
     }
 
@@ -97,8 +101,8 @@ class CurrencyRateServiceTest {
             .verifyComplete()
 
         verify(exchangeFunction).exchange(argThat { request: ClientRequest ->
-            request.url() == URI.create("https://open.er-api.com/v6/latest/USD")
-                    && request.method() == HttpMethod.GET
+            Equals(request.url().toString()).matches("https://open.er-api.com/v6/latest/USD")
+            Equals(request.method()).matches(HttpMethod.GET)
         })
     }
 
