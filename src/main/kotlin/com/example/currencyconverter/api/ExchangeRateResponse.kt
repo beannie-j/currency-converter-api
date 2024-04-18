@@ -6,7 +6,7 @@ data class ExchangeRateResponse(
     val errorMessage: String? = null
 ) {
     constructor(detailsResponse: ExchangeRateDetailsResponse) : this(
-        success = true,
+        success = !detailsResponse.rates.isNullOrEmpty(),
         rates = detailsResponse.rates ?: emptyMap(),
         errorMessage = detailsResponse.errorType
     )
