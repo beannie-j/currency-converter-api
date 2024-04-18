@@ -1,10 +1,11 @@
 package com.example.currencyconverter.controller
 
-import com.example.currencyconverter.exception.CurrencyRateException
+import com.example.currencyconverter.exception.CurrencyRateClientException
+import com.example.currencyconverter.exception.CurrencyRateServerException
 import com.example.currencyconverter.service.CurrencyRateService
-import com.example.currencyconverter.testutil.TestStubs.currencyRateException
-import com.example.currencyconverter.testutil.TestStubs.currencyRateNotFoundException
 import com.example.currencyconverter.testutil.TestStubs.exchangeRateResponse
+import com.example.currencyconverter.testutil.TestStubs.internalServerError
+import com.example.currencyconverter.testutil.TestStubs.notFoundError
 import com.example.currencyconverter.testutil.TestStubs.unknownCurrency
 import com.example.currencyconverter.testutil.TestStubs.usdCurrency
 import org.assertj.core.api.Assertions.assertThat
@@ -42,12 +43,12 @@ class ExchangeRateControllerTest {
     @Test
     fun `should throw CurrencyRateNotFoundException when HTTP status is 404`() {
         `when`(currencyRateService.getExchangeRate(anyString()))
-            .thenReturn(Mono.error(currencyRateNotFoundException))
+            .thenReturn(Mono.error(notFoundError))
 
         StepVerifier.create(exchangeRateController.getExchangeRate(unknownCurrency))
             .expectErrorSatisfies {
-                assertThat(it).isInstanceOf(CurrencyRateException::class.java)
-                assertThat(it.message).isEqualTo("Currency not found")
+                assertThat(it).isInstanceOf(CurrencyRateClientException::class.java)
+                assertThat(it.message).isEqualTo("Not Found")
             }
             .verify()
 
@@ -57,11 +58,11 @@ class ExchangeRateControllerTest {
     @Test
     fun `should return empty response when HTTP status is 500`() {
         `when`(currencyRateService.getExchangeRate(anyString()))
-            .thenReturn(Mono.error(currencyRateException))
+            .thenReturn(Mono.error(internalServerError))
 
         StepVerifier.create(exchangeRateController.getExchangeRate(usdCurrency))
             .expectErrorSatisfies {
-                assertThat(it).isInstanceOf(CurrencyRateException::class.java)
+                assertThat(it).isInstanceOf(CurrencyRateServerException::class.java)
                 assertThat(it.message).isEqualTo("Internal Server Error")
             }
             .verify()

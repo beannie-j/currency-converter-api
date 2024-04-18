@@ -2,8 +2,9 @@ package com.example.currencyconverter.testutil
 
 import com.example.currencyconverter.api.ExchangeRateDetailsResponse
 import com.example.currencyconverter.api.ExchangeRateResponse
-import com.example.currencyconverter.exception.CurrencyRateException
-import org.springframework.http.HttpStatus
+import com.example.currencyconverter.exception.CurrencyRateClientException
+import com.example.currencyconverter.exception.CurrencyRateServerException
+import org.springframework.http.HttpStatusCode
 
 object TestStubs {
     const val testBaseUrl: String = "https://test.example.com"
@@ -30,6 +31,6 @@ object TestStubs {
 
     val exchangeRateResponse = ExchangeRateResponse(exchangeRateDetailsResponse)
 
-    val currencyRateException = CurrencyRateException(HttpStatus.INTERNAL_SERVER_ERROR.reasonPhrase)
-    val currencyRateNotFoundException = CurrencyRateException("Currency not found")
+    val internalServerError = CurrencyRateServerException("Internal Server Error", HttpStatusCode.valueOf(500))
+    val notFoundError = CurrencyRateClientException("Not Found", HttpStatusCode.valueOf(404))
 }

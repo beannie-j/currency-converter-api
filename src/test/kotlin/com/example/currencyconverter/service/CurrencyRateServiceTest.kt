@@ -1,7 +1,8 @@
 package com.example.currencyconverter.service
 
 import com.example.currencyconverter.api.ExchangeRateResponse
-import com.example.currencyconverter.exception.CurrencyRateException
+import com.example.currencyconverter.exception.CurrencyRateClientException
+import com.example.currencyconverter.exception.CurrencyRateServerException
 import com.example.currencyconverter.testutil.TestStubs
 import com.example.currencyconverter.testutil.TestStubs.unknownCurrency
 import com.example.currencyconverter.testutil.TestStubs.usdCurrency
@@ -68,7 +69,7 @@ class CurrencyRateServiceTest {
     }
 
     @Test
-    fun `should throw CurrencyRateNotFoundException when currency is not found`() {
+    fun `should throw CurrencyRateClientException when currency is not found`() {
         val notFoundResponse = ClientResponse.create(HttpStatus.NOT_FOUND).build()
 
         `when`(exchangeFunction.exchange(any())).thenReturn(Mono.just(notFoundResponse))
@@ -77,7 +78,7 @@ class CurrencyRateServiceTest {
 
         StepVerifier.create(exchangeRate)
             .expectErrorSatisfies {
-                assertThat(it).isInstanceOf(CurrencyRateException::class.java)
+                assertThat(it).isInstanceOf(CurrencyRateClientException::class.java)
                 assertThat(it.message).isEqualTo("Failed to fetch currency rates: 404 Client Error")
             }
             .verify()
@@ -89,7 +90,7 @@ class CurrencyRateServiceTest {
     }
 
     @Test
-    fun `should throw CurrencyRateException when HTTP request fails`() {
+    fun `should throw CurrencyRateServerException when HTTP request fails`() {
         val failedResponse = ClientResponse.create(HttpStatus.INTERNAL_SERVER_ERROR).build()
 
         `when`(exchangeFunction.exchange(any())).thenReturn(Mono.just(failedResponse))
@@ -98,7 +99,7 @@ class CurrencyRateServiceTest {
 
         StepVerifier.create(exchangeRate)
             .expectErrorSatisfies {
-                assertThat(it).isInstanceOf(CurrencyRateException::class.java)
+                assertThat(it).isInstanceOf(CurrencyRateServerException::class.java)
                 assertThat(it.message).isEqualTo("Failed to fetch currency rates: 500 Server Error")
             }
             .verify()

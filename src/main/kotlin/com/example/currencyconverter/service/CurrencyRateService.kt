@@ -2,8 +2,8 @@ package com.example.currencyconverter.service
 
 import com.example.currencyconverter.api.ExchangeRateDetailsResponse
 import com.example.currencyconverter.api.ExchangeRateResponse
-import com.example.currencyconverter.exception.CurrencyConverterException
-import com.example.currencyconverter.exception.CurrencyRateException
+import com.example.currencyconverter.exception.CurrencyRateClientException
+import com.example.currencyconverter.exception.CurrencyRateServerException
 import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
@@ -15,7 +15,6 @@ import java.net.URI
 class CurrencyRateService(private val webClient: WebClient) {
 
     fun getExchangeRate(baseCurrency: String): Mono<ExchangeRateResponse> {
-
         val uri: URI = UriComponentsBuilder.newInstance()
             .scheme("https")
             .host("open.er-api.com")
@@ -26,9 +25,13 @@ class CurrencyRateService(private val webClient: WebClient) {
         return webClient.get()
             .uri(uri)
             .retrieve()
-            .onStatus({ status -> !status.is2xxSuccessful }, { clientResponse ->
+            .onStatus({ status -> status.is4xxClientError }, { clientResponse ->
                 val errorMessage = generateErrorMessage(clientResponse.statusCode())
-                Mono.error<CurrencyConverterException>(CurrencyRateException(errorMessage))
+                Mono.error(CurrencyRateClientException(message = errorMessage, statusCode = clientResponse.statusCode()))
+            })
+            .onStatus({ status -> status.is5xxServerError }, { clientResponse ->
+                val errorMessage = generateErrorMessage(clientResponse.statusCode())
+                Mono.error(CurrencyRateServerException(message = errorMessage, statusCode = clientResponse.statusCode()))
             })
             .bodyToMono(ExchangeRateDetailsResponse::class.java)
             .map { ExchangeRateResponse(it) }
