@@ -26,7 +26,8 @@ object TestStubs {
             "EUR" to 0.842593,
             "GBP" to 0.72478,
             "JPY" to 109.656
-        )
+        ),
+        errorType = null
     )
 
     val exchangeRateResponse = ExchangeRateResponse(exchangeRateDetailsResponse)

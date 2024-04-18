@@ -2,7 +2,7 @@ package com.example.currencyconverter.exception
 
 import org.springframework.http.HttpStatusCode
 
-open class CurrencyConverterException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
+open class CurrencyConverterException(message: String, cause: Throwable? = null) : Exception(message, cause)
 
 class CurrencyRateServerException(
     message: String,
