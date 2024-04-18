@@ -4,8 +4,7 @@ import com.example.currencyconverter.api.ExchangeRateDetailsResponse
 import com.example.currencyconverter.api.ExchangeRateResponse
 import com.example.currencyconverter.exception.CurrencyConverterException
 import com.example.currencyconverter.exception.CurrencyRateException
-import com.example.currencyconverter.exception.CurrencyRateNotFoundException
-import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriComponentsBuilder
@@ -27,15 +26,19 @@ class CurrencyRateService(private val webClient: WebClient) {
         return webClient.get()
             .uri(uri)
             .retrieve()
-            .onStatus({ status -> status.is4xxClientError }, { clientResponse ->
-                if (clientResponse.statusCode() == HttpStatus.NOT_FOUND) {
-                    val currencyRateNotFoundException = CurrencyRateNotFoundException("Currency not found")
-                    return@onStatus Mono.error<CurrencyConverterException>(currencyRateNotFoundException)
-                }
-                Mono.error<CurrencyConverterException>(CurrencyRateException("Failed to fetch currency rates"))
+            .onStatus({ status -> !status.is2xxSuccessful }, { clientResponse ->
+                val errorMessage = generateErrorMessage(clientResponse.statusCode())
+                Mono.error<CurrencyConverterException>(CurrencyRateException(errorMessage))
             })
             .bodyToMono(ExchangeRateDetailsResponse::class.java)
             .map { ExchangeRateResponse(it) }
-            .onErrorResume { it: Throwable -> Mono.just(ExchangeRateResponse(it)) }
+    }
+
+    private fun generateErrorMessage(httpStatusCode: HttpStatusCode): String {
+        return when {
+            httpStatusCode.is4xxClientError -> "Failed to fetch currency rates: ${httpStatusCode.value()} Client Error"
+            httpStatusCode.is5xxServerError -> "Failed to fetch currency rates: ${httpStatusCode.value()} Server Error"
+            else -> "Failed to fetch currency rates: ${httpStatusCode.value()} Error"
+        }
     }
 }

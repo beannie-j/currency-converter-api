@@ -1,10 +1,12 @@
 package com.example.currencyconverter.service
 
 import com.example.currencyconverter.api.ExchangeRateResponse
+import com.example.currencyconverter.exception.CurrencyRateException
 import com.example.currencyconverter.testutil.TestStubs
 import com.example.currencyconverter.testutil.TestStubs.unknownCurrency
 import com.example.currencyconverter.testutil.TestStubs.usdCurrency
 import com.example.currencyconverter.testutil.TestUtil.readFileFromResources
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.any
@@ -74,8 +76,11 @@ class CurrencyRateServiceTest {
         val exchangeRate = currencyRateService.getExchangeRate(unknownCurrency)
 
         StepVerifier.create(exchangeRate)
-            .expectNext(ExchangeRateResponse(success = false, rates = emptyMap(), errorMessage = "Currency not found"))
-            .verifyComplete()
+            .expectErrorSatisfies {
+                assertThat(it).isInstanceOf(CurrencyRateException::class.java)
+                assertThat(it.message).isEqualTo("Failed to fetch currency rates: 404 Client Error")
+            }
+            .verify()
 
         verify(exchangeFunction).exchange(argThat { request: ClientRequest ->
             Equals(request.url().toString()).matches("https://open.er-api.com/v6/latest/$unknownCurrency")
@@ -92,14 +97,11 @@ class CurrencyRateServiceTest {
         val exchangeRate = currencyRateService.getExchangeRate(usdCurrency)
 
         StepVerifier.create(exchangeRate)
-            .expectNext(
-                ExchangeRateResponse(
-                    success = false,
-                    rates = emptyMap(),
-                    errorMessage = "500 Internal Server Error from UNKNOWN "
-                )
-            )
-            .verifyComplete()
+            .expectErrorSatisfies {
+                assertThat(it).isInstanceOf(CurrencyRateException::class.java)
+                assertThat(it.message).isEqualTo("Failed to fetch currency rates: 500 Server Error")
+            }
+            .verify()
 
         verify(exchangeFunction).exchange(argThat { request: ClientRequest ->
             Equals(request.url().toString()).matches("https://open.er-api.com/v6/latest/$usdCurrency")

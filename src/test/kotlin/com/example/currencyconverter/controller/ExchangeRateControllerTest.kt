@@ -1,19 +1,19 @@
 package com.example.currencyconverter.controller
 
-import com.example.currencyconverter.api.ExchangeRateResponse
 import com.example.currencyconverter.exception.CurrencyRateException
-import com.example.currencyconverter.exception.CurrencyRateNotFoundException
 import com.example.currencyconverter.service.CurrencyRateService
+import com.example.currencyconverter.testutil.TestStubs.currencyRateException
+import com.example.currencyconverter.testutil.TestStubs.currencyRateNotFoundException
 import com.example.currencyconverter.testutil.TestStubs.exchangeRateResponse
 import com.example.currencyconverter.testutil.TestStubs.unknownCurrency
 import com.example.currencyconverter.testutil.TestStubs.usdCurrency
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
-import org.springframework.http.HttpStatus
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 
@@ -41,29 +41,30 @@ class ExchangeRateControllerTest {
 
     @Test
     fun `should throw CurrencyRateNotFoundException when HTTP status is 404`() {
-        val currencyNotFoundResponse = ExchangeRateResponse(CurrencyRateNotFoundException("Currency not found"))
-
         `when`(currencyRateService.getExchangeRate(anyString()))
-            .thenReturn(Mono.just(currencyNotFoundResponse))
+            .thenReturn(Mono.error(currencyRateNotFoundException))
 
         StepVerifier.create(exchangeRateController.getExchangeRate(unknownCurrency))
-            .expectNext(currencyNotFoundResponse)
-            .verifyComplete()
+            .expectErrorSatisfies {
+                assertThat(it).isInstanceOf(CurrencyRateException::class.java)
+                assertThat(it.message).isEqualTo("Currency not found")
+            }
+            .verify()
 
         verify(currencyRateService).getExchangeRate(unknownCurrency)
     }
 
     @Test
     fun `should return empty response when HTTP status is 500`() {
-        val internalServerErrorResponse =
-            ExchangeRateResponse(CurrencyRateException(HttpStatus.INTERNAL_SERVER_ERROR.reasonPhrase))
-
         `when`(currencyRateService.getExchangeRate(anyString()))
-            .thenReturn(Mono.just(internalServerErrorResponse))
+            .thenReturn(Mono.error(currencyRateException))
 
         StepVerifier.create(exchangeRateController.getExchangeRate(usdCurrency))
-            .expectNext(internalServerErrorResponse)
-            .verifyComplete()
+            .expectErrorSatisfies {
+                assertThat(it).isInstanceOf(CurrencyRateException::class.java)
+                assertThat(it.message).isEqualTo("Internal Server Error")
+            }
+            .verify()
 
         verify(currencyRateService).getExchangeRate(usdCurrency)
     }
