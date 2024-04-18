@@ -7,7 +7,7 @@ data class ExchangeRateResponse(
 ) {
     constructor(detailsResponse: ExchangeRateDetailsResponse) : this(
         success = true,
-        rates = detailsResponse.rates,
-        errorMessage = null
+        rates = detailsResponse.rates ?: emptyMap(),
+        errorMessage = detailsResponse.errorType
     )
 }

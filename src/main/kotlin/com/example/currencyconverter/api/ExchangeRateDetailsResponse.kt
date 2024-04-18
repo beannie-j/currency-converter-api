@@ -6,23 +6,25 @@ data class ExchangeRateDetailsResponse(
     @JsonProperty("result")
     val result: String,
     @JsonProperty("provider")
-    val provider: String,
+    val provider: String?,
     @JsonProperty("documentation")
-    val documentation: String,
+    val documentation: String?,
     @JsonProperty("terms_of_use")
-    val termsOfUse: String,
+    val termsOfUse: String?,
     @JsonProperty("time_last_update_unix")
-    val timeLastUpdateUnix: Long,
+    val timeLastUpdateUnix: Long?,
     @JsonProperty("time_last_update_utc")
-    val timeLastUpdateUtc: String,
+    val timeLastUpdateUtc: String?,
     @JsonProperty("time_next_update_unix")
-    val timeNextUpdateUnix: Long,
+    val timeNextUpdateUnix: Long?,
     @JsonProperty("time_next_update_utc")
-    val timeNextUpdateUtc: String,
+    val timeNextUpdateUtc: String?,
     @JsonProperty("time_eol_unix")
-    val timeEolUnix: Long,
+    val timeEolUnix: Long?,
     @JsonProperty("base_code")
-    val baseCode: String,
+    val baseCode: String?,
     @JsonProperty("rates")
-    val rates: Map<String, Double>
+    val rates: Map<String, Double>?,
+    @JsonProperty("error-type")
+    val errorType: String?
 )
